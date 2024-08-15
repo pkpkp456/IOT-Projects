@@ -1,105 +1,35 @@
-<!-- README.md -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IOT Projects</title>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        line-height: 1.6;
-    }
-    h1, h2, h3 {
-        color: #333;
-    }
-    .container {
-        width: 80%;
-        margin: 0 auto;
-    }
-    .project {
-        background: #f4f4f4;
-        padding: 10px;
-        margin-bottom: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-    }
-    .project h3 {
-        margin-top: 0;
-    }
-    .code {
-        background: #333;
-        color: #fff;
-        padding: 10px;
-        border-radius: 5px;
-        overflow-x: auto;
-    }
-    a {
-        color: #1e90ff;
-        text-decoration: none;
-    }
-    a:hover {
-        text-decoration: underline;
-    }
-</style>
-</head>
-<body>
-<div class="container">
-    <h1>IOT Projects</h1>
-    <p>Here you can find the projects needed for the basic learning of IOT. I also provide the Proteus files and Arduino codes.</p>
+# Farmer Assistant Bot
 
-    <div class="project">
-        <h3>Project 1: LED Blinking</h3>
-        <p>This project demonstrates the basic LED blinking using Arduino.</p>
-        <div class="code">
-            <pre><code>
-                // Arduino code for LED Blinking
-                void setup() {
-                    pinMode(LED_BUILTIN, OUTPUT);
-                }
+Farmer Assistant Bot is an IoT-based solution designed to assist farmers in managing their crops more efficiently. By integrating various sensors, image processing techniques, and machine learning models, this bot helps in monitoring and analyzing the farm environment, ensuring optimal conditions for crop growth.
 
-                void loop() {
-                    digitalWrite(LED_BUILTIN, HIGH);
-                    delay(1000);
-                    digitalWrite(LED_BUILTIN, LOW);
-                    delay(1000);
-                }
-            </code></pre>
-        </div>
-        <a href="path/to/proteus/file">Download Proteus File</a>
-    </div>
+## Features
 
-    <div class="project">
-        <h3>Project 2: Temperature Sensor</h3>
-        <p>This project uses a temperature sensor to read and display temperature values.</p>
-        <div class="code">
-            <pre><code>
-                // Arduino code for Temperature Sensor
-                #include <DHT.h>
-                #define DHTPIN 2
-                #define DHTTYPE DHT11
-                DHT dht(DHTPIN, DHTTYPE);
+- **Real-time Monitoring**: Collects temperature, humidity, and other environmental data using connected sensors.
+- **Image Processing**: Uses an ESP32-CAM module to capture images and process them to detect plant conditions and locate them in the field.
+- **Data Storage**: All sensor data and image analyses are stored in a centralized database for easy access and further analysis.
+- **Web Interface**: Provides a user-friendly interface for farmers to visualize data, track plant health, and receive alerts.
 
-                void setup() {
-                    Serial.begin(9600);
-                    dht.begin();
-                }
+## Components
 
-                void loop() {
-                    float h = dht.readHumidity();
-                    float t = dht.readTemperature();
-                    Serial.print("Humidity: ");
-                    Serial.print(h);
-                    Serial.print(" %\t");
-                    Serial.print("Temperature: ");
-                    Serial.print(t);
-                    Serial.println(" *C ");
-                    delay(2000);
-                }
-            </code></pre>
-        </div>
-        <a href="path/to/proteus/file">Download Proteus File</a>
-    </div>
-</div>
-</body>
-</html>
+- **Arduino Board**: Acts as the main control unit for the sensors and communication.
+- **ESP32-CAM**: Captures images and sends them to the server for processing.
+- **Temperature & Humidity Sensors**: Monitor the environmental conditions in real-time.
+- **Server**: Handles image processing using OpenCV, stores data, and provides a web interface.
+
+## How It Helps Farmers
+
+- **Efficient Crop Management**: By providing real-time data and insights, farmers can make informed decisions about watering, fertilization, and pest control.
+- **Early Detection of Issues**: Image processing helps in early detection of plant diseases, pests, and other issues, allowing for timely intervention.
+- **Data-Driven Decisions**: Historical data and trends help farmers plan better for future crops, optimizing yield and reducing costs.
+
+## Getting Started
+
+To get started with the Farmer Assistant Bot, you will need to set up the hardware and software components as described in the [Setup Guide](link-to-setup-guide).
+
+## Contributing
+
+Contributions are welcome! Please see the [Contribution Guidelines](link-to-contribution-guidelines) for more details.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](link-to-license) file for details.
