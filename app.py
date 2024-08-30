@@ -34,17 +34,23 @@ def process_image():
         # Find contours in the thresholded image
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        # Extract coordinates of bounding boxes around detected contours
-        plant_coordinates = []
-        for i, contour in enumerate(contours):
-            x, y, w, h = cv2.boundingRect(contour)
+        # Identify the largest contour
+        largest_contour = max(contours, key=cv2.contourArea, default=None)
+
+        # Initialize coordinates for the largest bounding box
+        largest_tree_coordinates = None
+
+        if largest_contour is not None:
+            x, y, w, h = cv2.boundingRect(largest_contour)
             center_x = x + w // 2
             center_y = y + h // 2
-            plant_coordinates.append({"x": center_x, "y": center_y})
+            area = w * h
 
             # Draw a bounding box and label on the image
             cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            cv2.putText(img, f'Plant {i+1}', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+            cv2.putText(img, 'Largest Tree', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+
+            largest_tree_coordinates = {"x": center_x, "y": center_y}
 
         # Convert the image to a format suitable for embedding in HTML
         _, img_encoded = cv2.imencode('.jpg', img)
@@ -54,15 +60,15 @@ def process_image():
         html_content = f'''
         <html>
         <body>
-            <h1>Detected Plants</h1>
+            <h1>Detected Largest Tree</h1>
             <img src="data:image/jpeg;base64,{base64.b64encode(img_bytes).decode('utf-8')}" alt="Processed Image">
-            <p>Coordinates: {plant_coordinates}</p>
+            <p>Largest Tree Coordinates: {largest_tree_coordinates}</p>
         </body>
         </html>
         '''
 
-        # Send coordinates back to the Arduino or any other consumer
-        coordinates_response = {"coordinates": plant_coordinates}
+        # Send the largest tree coordinates back to the Arduino or any other consumer
+        coordinates_response = {"coordinates": largest_tree_coordinates}
 
         return jsonify(coordinates_response), 200
 
