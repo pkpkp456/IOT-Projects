@@ -1,8 +1,8 @@
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify
 import cv2
 import numpy as np
-from io import BytesIO
 import base64
+from io import BytesIO
 
 app = Flask(__name__)
 
@@ -36,6 +36,10 @@ def detect_largest_tree(frame):
     except Exception as e:
         print(f"Error in detect_largest_tree: {e}")
         return None
+
+@app.route('/')
+def home():
+    return 'Welcome to the Flask Server!'
 
 @app.route('/upload', methods=['POST'])
 def upload_image():
