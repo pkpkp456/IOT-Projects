@@ -1,43 +1,75 @@
-from flask import Flask, request, jsonify
-import cv2
+from flask import Flask, request, jsonify, send_file, render_template_string
 import numpy as np
+import cv2
+from io import BytesIO
 
 app = Flask(__name__)
 
-# Route to receive the image and process it
+@app.route('/', methods=['GET'])
+def home():
+    return "Flask server is running!", 200
+
 @app.route('/process-image', methods=['POST'])
 def process_image():
     if 'image' not in request.files:
         return jsonify({"error": "No image file provided"}), 400
 
-    # Read the image file
     file = request.files['image']
+    
+    # Convert the image file to a numpy array
     np_img = np.frombuffer(file.read(), np.uint8)
     img = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
 
     if img is None:
         return jsonify({"error": "Failed to decode image"}), 400
 
-    # Convert the image to the HSV color space
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    # Convert the image to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    # Define the range of green color in HSV
-    lower_green = np.array([35, 40, 40])  # Lower bound for green
-    upper_green = np.array([85, 255, 255])  # Upper bound for green
+    # Apply a binary threshold to the image
+    _, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
 
-    # Create a mask with the specified green range
-    mask = cv2.inRange(hsv, lower_green, upper_green)
+    # Find contours in the thresholded image
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Find contours of the green areas in the image
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
+    # Extract coordinates of bounding boxes around detected contours
     plant_coordinates = []
-    for contour in contours:
-        if cv2.contourArea(contour) > 500:  # Only consider large enough objects
-            x, y, w, h = cv2.boundingRect(contour)
-            plant_coordinates.append({"x": int(x + w / 2), "y": int(y + h / 2)})
+    for i, contour in enumerate(contours):
+        x, y, w, h = cv2.boundingRect(contour)
+        center_x = x + w // 2
+        center_y = y + h // 2
+        plant_coordinates.append({"x": center_x, "y": center_y})
 
-    return jsonify({"coordinates": plant_coordinates}), 200
+        # Draw a bounding box and label on the image
+        cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        cv2.putText(img, f'Plant {i+1}', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+
+    # Convert the image to a format suitable for sending via Flask
+    _, img_encoded = cv2.imencode('.jpg', img)
+    img_bytes = img_encoded.tobytes()
+
+    # Create a BytesIO object to serve the image
+    img_io = BytesIO(img_bytes)
+    img_io.seek(0)
+
+    # Generate HTML with the image
+    html_content = f'''
+    <html>
+    <body>
+        <h1>Detected Plants</h1>
+        <img src="data:image/jpeg;base64,{base64.b64encode(img_bytes).decode('utf-8')}" alt="Processed Image">
+        <p>Coordinates: {plant_coordinates}</p>
+    </body>
+    </html>
+    '''
+
+    # Send coordinates back to the Arduino (for demonstration, this example assumes the request body is JSON)
+    response = {
+        "coordinates": plant_coordinates,
+        "message": "Plants detected and annotated"
+    }
+
+    return render_template_string(html_content), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
